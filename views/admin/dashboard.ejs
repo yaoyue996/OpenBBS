@@ -1,0 +1,108 @@
+<%- include('../partials/head') %>
+
+<div class="admin-shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>管理后台</h1>
+      <p class="page-sub">站点概览与运营数据。</p>
+    </div>
+    <a class="btn btn-subtle" href="/admin/backup"><%- icon('download') %>备份数据库</a>
+  </div>
+
+  <%- include('../partials/admin-nav') %>
+
+  <% warnings.forEach((warning) => { %>
+    <div class="notice card notice--<%= warning.level === 'warning' ? 'danger' : 'info' %> notice--admin">
+      <%- icon(warning.level === 'warning' ? 'alert' : 'info') %>
+      <div><p><%= warning.text %></p></div>
+    </div>
+  <% }) %>
+
+  <div class="admin-stats">
+    <div class="stat-card card"><span class="stat-icon stat-icon--indigo"><%- icon('users') %></span><div><strong><%= formatNumber(stats.users) %></strong><span>成员</span></div></div>
+    <div class="stat-card card"><span class="stat-icon stat-icon--green"><%- icon('message') %></span><div><strong><%= formatNumber(stats.topics) %></strong><span>主题</span></div></div>
+    <div class="stat-card card"><span class="stat-icon stat-icon--pink"><%- icon('reply') %></span><div><strong><%= formatNumber(stats.posts) %></strong><span>回复</span></div></div>
+    <div class="stat-card card"><span class="stat-icon stat-icon--amber"><%- icon('eye') %></span><div><strong><%= formatNumber(stats.online) %></strong><span>近 15 分钟活跃</span></div></div>
+    <div class="stat-card card"><span class="stat-icon stat-icon--cyan"><%- icon('folder') %></span><div><strong><%= extra.categories %></strong><span>分类</span></div></div>
+    <div class="stat-card card"><span class="stat-icon stat-icon--red"><%- icon('alert') %></span><div><strong><%= extra.banned %></strong><span>已封禁用户</span></div></div>
+  </div>
+
+  <div class="admin-columns">
+    <section class="card admin-panel">
+      <div class="card-head card-head--row">
+        <h2>最近注册</h2>
+        <a class="text-link" href="/admin/users">全部用户<%- icon('arrow-right') %></a>
+      </div>
+      <ul class="admin-list">
+        <% recentUsers.forEach((item) => { %>
+          <li>
+            <a href="/u/<%= item.id %>" class="admin-user">
+              <%- include('../partials/avatar', { name: item.username, color: item.avatar_color, emoji: item.avatar_emoji, size: 'sm' }) %>
+              <span><strong><%= item.username %></strong><span class="muted"><%= item.email %></span></span>
+            </a>
+            <span class="role-tag role-tag--<%= item.role %>"><%= roleLabel(item.role) %></span>
+            <time class="muted"><%= timeAgo(item.created_at) %></time>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section class="card admin-panel">
+      <div class="card-head card-head--row">
+        <h2>最新主题</h2>
+        <a class="text-link" href="/admin/topics">内容管理<%- icon('arrow-right') %></a>
+      </div>
+      <ul class="admin-list">
+        <% recentTopics.forEach((item) => { %>
+          <li>
+            <span class="admin-list-main">
+              <% if (item.is_deleted) { %><span class="mini-badge mini-badge--danger">已删除</span><% } %>
+              <a href="/t/<%= item.id %>"><%= truncate(item.title, 40) %></a>
+              <span class="muted"><%= item.category_name %> · <%= item.username %></span>
+            </span>
+            <time class="muted"><%= timeAgo(item.created_at) %></time>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section class="card admin-panel">
+      <div class="card-head card-head--row">
+        <h2>最新回复</h2>
+      </div>
+      <ul class="admin-list">
+        <% recentPosts.forEach((item) => { %>
+          <li>
+            <span class="admin-list-main">
+              <a href="/p/<%= item.id %>"><%= excerpt(item.content, 60) %></a>
+              <span class="muted"><%= item.username %> · <%= item.title %></span>
+            </span>
+            <time class="muted"><%= timeAgo(item.created_at) %></time>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section class="card admin-panel">
+      <div class="card-head">
+        <h2>系统信息</h2>
+        <p class="muted">用于排查部署问题。</p>
+      </div>
+      <dl class="system-list">
+        <div><dt>Node.js</dt><dd><%= system.node %></dd></div>
+        <div><dt>平台</dt><dd><%= system.platform %></dd></div>
+        <div><dt>站点 URL</dt><dd><%= system.siteUrl %></dd></div>
+        <div><dt>数据库</dt><dd class="mono"><%= system.database %></dd></div>
+        <div><dt>运行时长</dt><dd><%= Math.floor(system.uptime / 3600) %> 小时 <%= Math.floor((system.uptime % 3600) / 60) %> 分钟</dd></div>
+        <div><dt>管理员 / 版主</dt><dd><%= extra.admins %> / <%= extra.moderators %></dd></div>
+        <div><dt>回收站主题</dt><dd><%= extra.deletedTopics %></dd></div>
+      </dl>
+      <div class="admin-panel-actions">
+        <a class="btn btn-subtle btn-sm" href="/admin/backup"><%- icon('download') %>下载数据库备份</a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

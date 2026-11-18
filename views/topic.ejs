@@ -1,0 +1,132 @@
+<%- include('partials/head') %>
+
+<nav class="breadcrumb" aria-label="面包屑">
+  <a href="/">首页</a><span>/</span>
+  <a href="/c/<%= topic.category_id %>"><%= topic.category_icon %> <%= topic.category_name %></a><span>/</span>
+  <span><%= truncate(topic.title, 40) %></span>
+</nav>
+
+<header class="topic-hero">
+  <div class="topic-hero-top">
+    <div class="topic-badges">
+      <a class="category-chip" href="/c/<%= topic.category_id %>" style="--cat-color: <%= topic.category_color %>"><%= topic.category_icon %> <%= topic.category_name %></a>
+      <% if (topic.is_pinned) { %><span class="mini-badge mini-badge--pin"><%- icon('pin') %>置顶</span><% } %>
+      <% if (topic.is_locked) { %><span class="mini-badge"><%- icon('lock') %>已锁定</span><% } %>
+    </div>
+    <div class="topic-hero-actions">
+      <button type="button" class="btn btn-subtle btn-sm" data-copy="<%= siteUrl %>/t/<%= topic.id %>"><%- icon('link') %>复制链接</button>
+      <% if (user) { %>
+        <form action="/t/<%= topic.id %>/bookmark" method="post" class="inline-form" data-bookmark-form>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-subtle btn-sm<%= bookmarked ? ' is-active' : '' %>" data-bookmark-button>
+            <%- icon('bookmark') %><span data-bookmark-label><%= bookmarked ? '已收藏' : '收藏' %></span>
+          </button>
+        </form>
+      <% } else { %>
+        <a class="btn btn-subtle btn-sm" href="/login?next=<%= encodeURIComponent(`/t/${topic.id}`) %>"><%- icon('bookmark') %>收藏</a>
+      <% } %>
+      <% if (canModerate || (user && user.id === topic.user_id)) { %>
+        <details class="manage-menu">
+          <summary class="btn btn-subtle btn-sm"><%- icon('shield') %>管理</summary>
+          <div class="manage-panel">
+            <% if (canModerate) { %>
+              <form action="/t/<%= topic.id %>/moderate" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="action" value="<%= topic.is_pinned ? 'unpin' : 'pin' %>">
+                <button type="submit" class="menu-button"><%- icon('pin') %><%= topic.is_pinned ? '取消置顶' : '置顶主题' %></button>
+              </form>
+              <form action="/t/<%= topic.id %>/moderate" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="action" value="<%= topic.is_locked ? 'unlock' : 'lock' %>">
+                <button type="submit" class="menu-button"><%- icon('lock') %><%= topic.is_locked ? '解锁主题' : '锁定主题' %></button>
+              </form>
+            <% } %>
+            <% if (user && (user.id === topic.user_id || canModerate)) { %>
+              <form action="/t/<%= topic.id %>/delete" method="post" data-confirm="确定要删除整个主题吗？管理员可以在后台恢复。">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="menu-button menu-button--danger"><%- icon('trash') %>删除主题</button>
+              </form>
+            <% } %>
+          </div>
+        </details>
+      <% } %>
+    </div>
+  </div>
+
+  <h1><%= topic.title %></h1>
+
+  <div class="topic-meta">
+    <a class="topic-meta-author" href="/u/<%= topic.user_id %>">
+      <%- include('partials/avatar', { name: topic.author_username, color: topic.author_avatar_color, emoji: topic.author_avatar_emoji, size: 'sm' }) %>
+      <span><%= topic.author_username %></span>
+    </a>
+    <span>发布于 <%= timeAgo(topic.created_at) %></span>
+    <span><%- icon('eye') %><%= formatNumber(topic.views) %> 浏览</span>
+    <span><%- icon('message') %><%= formatNumber(topic.replies_count) %> 回复</span>
+  </div>
+</header>
+
+<div class="post-list">
+  <% posts.forEach((post, index) => { %>
+    <%- include('partials/post', { post, topic, quoted, liked, pager, floor: pager.offset + index + 1 }) %>
+  <% }) %>
+</div>
+
+<%- include('partials/pagination', { pager }) %>
+
+<% if (topic.is_locked) { %>
+  <div class="notice card notice--locked">
+    <%- icon('lock') %>
+    <div><strong>该主题已锁定</strong><p>锁定后无法继续回复。如果你有新的问题，可以发布一个新主题。</p></div>
+  </div>
+<% } %>
+
+<section class="reply-section" id="reply">
+  <% if (!user) { %>
+    <div class="card reply-login">
+      <div>
+        <h2>参与讨论</h2>
+        <p class="muted">登录后即可回复，和其他成员一起交流。</p>
+      </div>
+      <div class="reply-login-actions">
+        <a class="btn btn-primary" href="/login?next=<%= encodeURIComponent(`/t/${topic.id}`) %>">登录</a>
+        <% if (registrationOpen) { %><a class="btn btn-ghost" href="/register">注册账户</a><% } %>
+      </div>
+    </div>
+  <% } else if (!topic.is_locked || canModerate) { %>
+    <div class="card reply-card">
+      <div class="reply-card-head">
+        <h2><% if (quotePost) { %>回复 @<%= quotePost.username %><% } else { %>参与讨论<% } %></h2>
+        <span class="muted">以 <%= user.username %> 的身份回复</span>
+      </div>
+      <% if (quotePost) { %>
+        <div class="quote-hint">
+          <%- icon('quote') %>
+          <span>正在引用 @<%= quotePost.username %> 的回复</span>
+          <a href="/t/<%= topic.id %>#reply">取消引用</a>
+        </div>
+      <% } %>
+      <form action="/t/<%= topic.id %>/reply" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% if (quotePost) { %><input type="hidden" name="reply_to_post_id" value="<%= quotePost.id %>"><% } %>
+        <%- include('partials/editor', {
+          contentValue: quoteText,
+          draftKey: `reply-${topic.id}`,
+          placeholder: '写下你的回复… 支持 Markdown',
+          rows: 9
+        }) %>
+        <div class="form-actions">
+          <span class="muted">Ctrl / ⌘ + Enter 快速发送</span>
+          <button type="submit" class="btn btn-primary"><%- icon('send') %>发布回复</button>
+        </div>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="notice card notice--locked">
+      <%- icon('lock') %>
+      <div><strong>主题已锁定</strong><p>当前主题不接受新回复。</p></div>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

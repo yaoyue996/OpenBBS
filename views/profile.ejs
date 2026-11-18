@@ -1,0 +1,122 @@
+<%- include('partials/head') %>
+
+<section class="profile-hero card">
+  <div class="profile-main">
+    <%- include('partials/avatar', { name: profileUser.username, color: profileUser.avatar_color, emoji: profileUser.avatar_emoji, size: 'xl' }) %>
+    <div class="profile-info">
+      <div class="profile-name-line">
+        <h1><%= profileUser.username %></h1>
+        <span class="role-tag role-tag--<%= profileUser.role %>"><%= roleLabel(profileUser.role) %></span>
+        <% if (profileUser.is_banned) { %><span class="role-tag role-tag--banned">已封禁</span><% } %>
+        <% if (online) { %><span class="online-pill"><span class="online-dot"></span>在线</span><% } %>
+      </div>
+      <p class="profile-meta">
+        加入于 <%= formatDateOnly(profileUser.created_at) %>
+        <span class="dot">·</span>
+        最近活跃 <%= timeAgo(profileUser.last_seen_at) %>
+      </p>
+      <% if (profileUser.bio) { %>
+        <p class="profile-bio"><%= profileUser.bio %></p>
+      <% } else { %>
+        <p class="profile-bio profile-bio--empty">这个人还没有填写简介。</p>
+      <% } %>
+    </div>
+    <div class="profile-actions">
+      <% if (isSelf) { %>
+        <a class="btn btn-subtle" href="/settings"><%- icon('settings') %>编辑资料</a>
+      <% } %>
+      <% if (isAdmin) { %>
+        <a class="btn btn-subtle" href="/admin/users?q=<%= encodeURIComponent(profileUser.username) %>"><%- icon('shield') %>管理</a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div><strong><%= formatNumber(stats.topics) %></strong><span>主题</span></div>
+    <div><strong><%= formatNumber(stats.posts) %></strong><span>回复</span></div>
+    <div><strong><%= formatNumber(stats.likes) %></strong><span>获赞</span></div>
+  </div>
+
+  <% if (signatureHtml) { %>
+    <div class="profile-signature markdown-body markdown-body--compact"><%- signatureHtml %></div>
+  <% } %>
+</section>
+
+<% if (profileUser.is_banned && (canModerate || isAdmin)) { %>
+  <div class="notice notice--danger card">
+    <%- icon('alert') %>
+    <div><strong>该用户已被封禁</strong><% if (profileUser.ban_reason) { %><p>原因：<%= profileUser.ban_reason %></p><% } %></div>
+  </div>
+<% } %>
+
+<div class="tabs tabs--page">
+  <a href="<%= queryUrl({ tab: 'topics', page: null }) %>" class="<%= tab === 'topics' ? 'is-active' : '' %>"><%- icon('message') %>主题 <span><%= stats.topics %></span></a>
+  <a href="<%= queryUrl({ tab: 'replies', page: null }) %>" class="<%= tab === 'replies' ? 'is-active' : '' %>"><%- icon('reply') %>回复 <span><%= stats.posts %></span></a>
+  <% if (isSelf) { %>
+    <a href="<%= queryUrl({ tab: 'bookmarks', page: null }) %>" class="<%= tab === 'bookmarks' ? 'is-active' : '' %>"><%- icon('bookmark') %>收藏</a>
+  <% } %>
+</div>
+
+<% if (tab === 'topics') { %>
+  <% if (topics.length === 0) { %>
+    <div class="empty-state card">
+      <span class="empty-icon">📝</span>
+      <h3>还没有发布主题</h3>
+      <% if (isSelf) { %><p>把你最近的想法分享出来吧。</p><a class="btn btn-primary" href="/new">发布主题</a><% } else { %><p>这里空空如也。</p><% } %>
+    </div>
+  <% } else { %>
+    <div class="topic-list card topic-list--card">
+      <% topics.forEach((topic) => { %>
+        <%- include('partials/topic-row', { topic }) %>
+      <% }) %>
+    </div>
+    <%- include('partials/pagination', { pager }) %>
+  <% } %>
+<% } %>
+
+<% if (tab === 'replies') { %>
+  <% if (replies.length === 0) { %>
+    <div class="empty-state card">
+      <span class="empty-icon">💬</span>
+      <h3>还没有回复</h3>
+      <p>参与讨论，留下你的想法。</p>
+      <a class="btn btn-primary" href="/topics">浏览话题</a>
+    </div>
+  <% } else { %>
+    <div class="reply-list">
+      <% replies.forEach((reply) => { %>
+        <article class="reply-item card">
+          <div class="reply-item-meta">
+            <a href="/c/<%= reply.category_id %>" class="category-chip" style="--cat-color: <%= reply.color %>"><%= reply.category_name %></a>
+            <span class="dot">·</span>
+            <a href="/t/<%= reply.topic_id %>"><%= truncate(reply.topic_title, 60) %></a>
+            <span class="muted"><%= timeAgo(reply.created_at) %></span>
+          </div>
+          <p class="reply-snippet"><%= reply.snippet %></p>
+          <a class="text-link" href="/p/<%= reply.id %>">查看回复<%- icon('arrow-right') %></a>
+        </article>
+      <% }) %>
+    </div>
+    <%- include('partials/pagination', { pager }) %>
+  <% } %>
+<% } %>
+
+<% if (tab === 'bookmarks' && isSelf) { %>
+  <% if (bookmarks.length === 0) { %>
+    <div class="empty-state card">
+      <span class="empty-icon">🔖</span>
+      <h3>收藏夹是空的</h3>
+      <p>看到喜欢的内容时，点击「收藏」保存到这里。</p>
+      <a class="btn btn-primary" href="/topics">去逛逛</a>
+    </div>
+  <% } else { %>
+    <div class="topic-list card topic-list--card">
+      <% bookmarks.forEach((topic) => { %>
+        <%- include('partials/topic-row', { topic }) %>
+      <% }) %>
+    </div>
+    <%- include('partials/pagination', { pager }) %>
+  <% } %>
+<% } %>
+
+<%- include('partials/footer') %>

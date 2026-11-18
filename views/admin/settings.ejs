@@ -1,0 +1,85 @@
+<%- include('../partials/head') %>
+
+<div class="admin-shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>站点设置</h1>
+      <p class="page-sub">修改站点信息、注册策略与发帖限制。</p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-nav') %>
+
+  <form class="card form-card settings-form" action="/admin/settings" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="card-head">
+      <h2>基本信息</h2>
+      <p class="muted">站点名称会显示在页面标题、页头与 RSS 中。</p>
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="site_name">站点名称</label>
+        <input id="site_name" type="text" name="site_name" value="<%= settings.site_name %>" maxlength="60" required>
+      </div>
+      <div class="field">
+        <label for="footer_text">页脚文字</label>
+        <input id="footer_text" type="text" name="footer_text" value="<%= settings.footer_text %>" maxlength="200">
+      </div>
+    </div>
+    <div class="field">
+      <label for="site_description">站点描述</label>
+      <input id="site_description" type="text" name="site_description" value="<%= settings.site_description %>" maxlength="200">
+    </div>
+    <div class="field">
+      <label for="site_announcement">站点公告（支持 Markdown）</label>
+      <textarea id="site_announcement" name="site_announcement" rows="10" maxlength="10000" class="mono"><%= settings.site_announcement %></textarea>
+    </div>
+
+    <div class="field-divider"></div>
+    <div class="card-head">
+      <h2>社区策略</h2>
+    </div>
+    <label class="switch">
+      <input type="checkbox" name="registration_open" value="1" <%= settings.registration_open === '1' ? 'checked' : '' %>>
+      <span class="switch-track"></span>
+      <span class="switch-text">开放注册</span>
+    </label>
+    <div class="field-grid field-grid--three">
+      <div class="field">
+        <label for="topics_per_page">每页主题数</label>
+        <input id="topics_per_page" type="number" name="topics_per_page" value="<%= settings.topics_per_page %>" min="5" max="100">
+      </div>
+      <div class="field">
+        <label for="posts_per_page">每页回复数</label>
+        <input id="posts_per_page" type="number" name="posts_per_page" value="<%= settings.posts_per_page %>" min="5" max="100">
+      </div>
+      <div class="field">
+        <label for="post_cooldown">发帖冷却（秒）</label>
+        <input id="post_cooldown" type="number" name="post_cooldown" value="<%= settings.post_cooldown %>" min="0" max="3600">
+        <span class="field-hint">管理员和版主不受限制。</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%- icon('check') %>保存设置</button>
+    </div>
+  </form>
+
+  <div class="card admin-panel settings-info">
+    <div class="card-head">
+      <h2>部署信息</h2>
+      <p class="muted">以下配置来自环境变量（.env），修改后需要重启服务。</p>
+    </div>
+    <dl class="system-list">
+      <div><dt>站点 URL</dt><dd class="mono"><%= siteUrl %></dd></div>
+      <div><dt>运行环境</dt><dd class="mono"><%= deployment.env %></dd></div>
+      <div><dt>Node.js</dt><dd class="mono"><%= deployment.node %></dd></div>
+      <div><dt>反向代理</dt><dd class="mono"><%= deployment.trustProxy %></dd></div>
+      <div><dt>Cookie 安全</dt><dd class="mono"><%= deployment.cookieSecure %></dd></div>
+    </dl>
+    <p class="muted">生产环境请将 <code>SITE_URL</code> 设置为公开域名，并在反向代理后设置 <code>TRUST_PROXY=1</code>。</p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

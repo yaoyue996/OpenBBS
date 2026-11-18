@@ -1,0 +1,42 @@
+{
+  "name": "openbbs",
+  "version": "1.0.0",
+  "description": "A modern, self-hosted, open-source BBS forum with one-click deployment.",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "init": "node scripts/init.js",
+    "reset-password": "node scripts/reset-password.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "bbs",
+    "forum",
+    "community",
+    "sqlite",
+    "express",
+    "self-hosted"
+  ],
+  "author": "yaoyue996",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaoyue996/OpenBBS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yaoyue996/OpenBBS/issues"
+  },
+  "homepage": "https://github.com/yaoyue996/OpenBBS#readme",
+  "dependencies": {
+    "compression": "^1.8.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "markdown-it": "^14.1.0",
+    "sanitize-html": "^2.17.0"
+  }
+}

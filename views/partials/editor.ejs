@@ -1,0 +1,27 @@
+<% const editorValue = typeof contentValue !== 'undefined' ? contentValue : ''; %>
+<% const editorKey = typeof draftKey !== 'undefined' ? draftKey : 'content'; %>
+<% const editorPlaceholder = typeof placeholder !== 'undefined' ? placeholder : '写点什么…'; %>
+<% const editorRows = typeof rows !== 'undefined' ? rows : 10; %>
+<div class="editor" data-editor data-draft-key="<%= editorKey %>">
+  <div class="editor-toolbar" role="toolbar" aria-label="Markdown 工具栏">
+    <button type="button" class="editor-tool" data-md="bold" title="加粗"><%- icon('bold') %></button>
+    <button type="button" class="editor-tool" data-md="italic" title="斜体"><%- icon('italic') %></button>
+    <button type="button" class="editor-tool editor-tool--text" data-md="heading" title="标题">H</button>
+    <span class="editor-sep"></span>
+    <button type="button" class="editor-tool" data-md="link" title="链接"><%- icon('link') %></button>
+    <button type="button" class="editor-tool" data-md="code" title="代码"><%- icon('code') %></button>
+    <button type="button" class="editor-tool" data-md="quote" title="引用"><%- icon('quote') %></button>
+    <button type="button" class="editor-tool" data-md="list" title="列表"><%- icon('list') %></button>
+    <button type="button" class="editor-tool" data-md="image" title="图片"><%- icon('image') %></button>
+    <span class="editor-spacer"></span>
+    <button type="button" class="editor-tool editor-tool--preview" data-preview-toggle title="预览 Markdown">
+      <%- icon('eye') %><span>预览</span>
+    </button>
+  </div>
+  <textarea class="editor-input" name="content" rows="<%= editorRows %>" maxlength="50000" required placeholder="<%= editorPlaceholder %>" data-editor-input><%= editorValue %></textarea>
+  <div class="editor-preview markdown-body" data-editor-preview hidden></div>
+  <div class="editor-footer">
+    <span>支持 Markdown · 拖入链接或图片可直接粘贴</span>
+    <span class="editor-status" data-draft-status></span>
+  </div>
+</div>

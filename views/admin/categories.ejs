@@ -1,0 +1,90 @@
+<%- include('../partials/head') %>
+
+<div class="admin-shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>分类管理</h1>
+      <p class="page-sub">组织论坛的讨论板块。</p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-nav') %>
+
+  <div class="admin-columns admin-columns--form">
+    <form class="card form-card" action="/admin/categories/save" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="id" value="<%= editCategory ? editCategory.id : '' %>">
+      <div class="card-head">
+        <h2><%= editCategory ? `编辑分类：${editCategory.name}` : '新建分类' %></h2>
+        <p class="muted">图标可以是一个 emoji，颜色用于分类标识。</p>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="name">名称</label>
+          <input id="name" type="text" name="name" value="<%= editCategory ? editCategory.name : '' %>" maxlength="40" required>
+        </div>
+        <div class="field">
+          <label for="position">排序</label>
+          <input id="position" type="number" name="position" value="<%= editCategory ? editCategory.position : 0 %>" min="-999" max="9999">
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="icon">图标 Emoji</label>
+          <input id="icon" type="text" name="icon" value="<%= editCategory ? editCategory.icon : '💬' %>" maxlength="16">
+        </div>
+        <div class="field">
+          <label for="color">颜色</label>
+          <input id="color" type="color" name="color" value="<%= editCategory ? editCategory.color : '#6366f1' %>">
+        </div>
+      </div>
+      <div class="field">
+        <label for="description">描述</label>
+        <input id="description" type="text" name="description" value="<%= editCategory ? editCategory.description : '' %>" maxlength="200" placeholder="一句话说明这个分类的用途">
+      </div>
+      <div class="form-actions">
+        <% if (editCategory) { %><a class="btn btn-ghost" href="/admin/categories">取消编辑</a><% } %>
+        <button type="submit" class="btn btn-primary"><%- icon(editCategory ? 'check' : 'plus') %><%= editCategory ? '保存修改' : '创建分类' %></button>
+      </div>
+    </form>
+
+    <section class="card admin-panel">
+      <div class="card-head">
+        <h2>现有分类</h2>
+        <p class="muted">分类下仍有主题时无法删除。</p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>分类</th><th>主题</th><th>回复</th><th>排序</th><th class="col-actions">操作</th></tr></thead>
+          <tbody>
+            <% categories.forEach((category) => { %>
+              <tr>
+                <td>
+                  <span class="table-category">
+                    <span class="table-category-icon" style="background: <%= category.color %>22; color: <%= category.color %>"><%= category.icon %></span>
+                    <span><strong><%= category.name %></strong><span class="muted"><%= category.description %></span></span>
+                  </span>
+                </td>
+                <td><%= category.topic_count %></td>
+                <td><%= category.post_count %></td>
+                <td><%= category.position %></td>
+                <td class="col-actions">
+                  <div class="row-actions">
+                    <a class="btn btn-ghost btn-xs" href="/admin/categories?edit=<%= category.id %>"><%- icon('edit') %>编辑</a>
+                    <form action="/admin/categories/<%= category.id %>/delete" method="post" data-confirm="确定删除分类「<%= category.name %>」吗？">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-ghost btn-xs btn-ghost--danger" <%= category.topic_count > 0 ? 'disabled title="请先清空该分类下的主题"' : '' %>><%- icon('trash') %>删除</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

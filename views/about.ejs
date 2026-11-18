@@ -1,0 +1,67 @@
+<%- include('partials/head') %>
+
+<section class="about-hero card">
+  <div>
+    <span class="hero-kicker"><%- icon('sparkles') %>关于本站</span>
+    <h1><%= settings.site_name %></h1>
+    <p class="about-desc"><%= settings.site_description %></p>
+    <div class="about-stats">
+      <div><strong><%= formatNumber(stats.users) %></strong><span>成员</span></div>
+      <div><strong><%= formatNumber(stats.topics) %></strong><span>主题</span></div>
+      <div><strong><%= formatNumber(stats.posts) %></strong><span>回复</span></div>
+      <div><strong><%= formatNumber(stats.online) %></strong><span>近 15 分钟活跃</span></div>
+    </div>
+  </div>
+  <img src="<%= asset('logo.svg') %>" width="120" height="120" alt="" class="about-logo">
+</section>
+
+<div class="layout layout--sidebar">
+  <div class="layout-main">
+    <section class="card content-card">
+      <h2>社区公告与规则</h2>
+      <div class="markdown-body">
+        <%- announcementHtml %>
+      </div>
+    </section>
+
+    <section class="card content-card">
+      <h2>关于 OpenBBS</h2>
+      <p>OpenBBS 是一个开源、可自托管的 BBS 论坛系统，使用 Node.js 与 SQLite 构建，强调简单、快速和可靠部署。</p>
+      <div class="tech-tags">
+        <span>Node.js</span><span>Express</span><span>SQLite</span><span>EJS</span><span>Markdown</span><span>零原生依赖</span>
+      </div>
+      <div class="about-links">
+        <a class="btn btn-subtle" href="https://github.com/yaoyue996/OpenBBS" target="_blank" rel="noopener"><%- icon('external') %>GitHub 仓库</a>
+        <a class="btn btn-ghost" href="/feed.xml"><%- icon('rss') %>RSS 订阅</a>
+      </div>
+    </section>
+  </div>
+
+  <aside class="sidebar">
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('users') %>管理团队</h3>
+      <ul class="team-list">
+        <% team.forEach((member) => { %>
+          <li>
+            <a href="/u/<%= member.id %>" class="team-member">
+              <%- include('partials/avatar', { name: member.username, color: member.avatar_color, emoji: member.avatar_emoji, size: 'md' }) %>
+              <span>
+                <strong><%= member.username %></strong>
+                <span class="role-tag role-tag--<%= member.role %>"><%= roleLabel(member.role) %></span>
+              </span>
+            </a>
+          </li>
+        <% }) %>
+        <% if (team.length === 0) { %><li class="muted">暂无管理员信息。</li><% } %>
+      </ul>
+    </div>
+
+    <div class="card sidebar-card sidebar-card--accent">
+      <h3 class="sidebar-title"><%- icon('code') %>参与贡献</h3>
+      <p class="muted">发现问题或有新想法？欢迎提交 Issue，或直接发起 Pull Request。</p>
+      <a class="btn btn-subtle btn-block" href="https://github.com/yaoyue996/OpenBBS/issues" target="_blank" rel="noopener"><%- icon('external') %>提交反馈</a>
+    </div>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

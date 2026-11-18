@@ -1,0 +1,104 @@
+<%- include('partials/head') %>
+
+<nav class="breadcrumb" aria-label="面包屑">
+  <a href="/">首页</a><span>/</span><span>个人设置</span>
+</nav>
+
+<div class="page-head page-head--compact">
+  <div>
+    <span class="eyebrow">Settings</span>
+    <h1>个人设置</h1>
+    <p class="page-sub">管理你的公开资料和账户安全。</p>
+  </div>
+  <a class="btn btn-ghost" href="/u/<%= user.id %>"><%- icon('user') %>查看主页</a>
+</div>
+
+<div class="settings-grid">
+  <form class="card form-card" action="/settings/profile" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="card-head">
+      <h2>公开资料</h2>
+      <p class="muted">这些信息会显示在你的个人主页和帖子旁。</p>
+    </div>
+
+    <div class="avatar-editor">
+      <%- include('partials/avatar', { name: user.username, color: user.avatar_color, emoji: user.avatar_emoji, size: 'xl' }) %>
+      <div class="avatar-fields">
+        <div class="field">
+          <label for="avatar_emoji">头像 Emoji（可选）</label>
+          <input id="avatar_emoji" type="text" name="avatar_emoji" value="<%= user.avatar_emoji %>" maxlength="16" placeholder="例如 🐱 或 🚀">
+          <span class="field-hint">留空则显示用户名首字母。</span>
+        </div>
+        <div class="field">
+          <label for="avatar_color">头像颜色</label>
+          <div class="color-row">
+            <input id="avatar_color" type="color" name="avatar_color" value="<%= user.avatar_color || avatarColor(user) %>">
+            <span class="field-hint">选择你喜欢的背景色。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="bio">个人简介</label>
+      <textarea id="bio" name="bio" rows="3" maxlength="500" placeholder="介绍一下你自己…"><%= user.bio %></textarea>
+    </div>
+    <div class="field">
+      <label for="signature">帖子签名</label>
+      <textarea id="signature" name="signature" rows="3" maxlength="300" placeholder="会显示在你每条回复的下方，支持 Markdown"><%= user.signature %></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%- icon('check') %>保存资料</button>
+    </div>
+  </form>
+
+  <form class="card form-card" action="/settings/account" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="card-head">
+      <h2>账户安全</h2>
+      <p class="muted">修改邮箱或密码需要验证当前密码。</p>
+    </div>
+
+    <% if (errors.account) { %>
+      <div class="flash flash--error" role="alert">
+        <span class="flash-icon"><%- icon('alert') %></span>
+        <span class="flash-text"><%= errors.account %></span>
+      </div>
+    <% } %>
+
+    <div class="field">
+      <label for="email">邮箱</label>
+      <input id="email" type="email" name="email" value="<%= values.email || user.email %>" required autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="current_password">当前密码</label>
+      <input id="current_password" type="password" name="current_password" required autocomplete="current-password">
+    </div>
+    <div class="field-divider"></div>
+    <div class="field">
+      <label for="new_password">新密码（可选）</label>
+      <input id="new_password" type="password" name="new_password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="留空则不修改">
+    </div>
+    <div class="field">
+      <label for="confirm_password">确认新密码</label>
+      <input id="confirm_password" type="password" name="confirm_password" minlength="8" maxlength="128" autocomplete="new-password">
+    </div>
+    <p class="field-hint">修改密码后，其他设备上的登录会立即失效。</p>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%- icon('shield') %>保存账户设置</button>
+    </div>
+  </form>
+</div>
+
+<div class="card danger-zone">
+  <div>
+    <h3>登录状态</h3>
+    <p class="muted">如果你在公共设备上登录，使用完请及时退出。</p>
+  </div>
+  <form action="/logout" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button type="submit" class="btn btn-subtle"><%- icon('logout') %>退出登录</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

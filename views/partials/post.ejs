@@ -1,0 +1,63 @@
+<% const quotedPost = quoted ? quoted.get(post.reply_to_post_id) : null; %>
+<% const canEditPost = user && (user.id === post.user_id || canModerate); %>
+<article class="post<%= post.is_first ? ' post--first' : '' %>" id="post-<%= post.id %>">
+  <aside class="post-author">
+    <a href="/u/<%= post.user_id %>" class="post-author-link">
+      <%- include('avatar', { name: post.username, color: post.avatar_color, emoji: post.avatar_emoji, size: 'lg' }) %>
+      <span class="post-author-name"><%= post.username %></span>
+    </a>
+    <div class="post-author-tags">
+      <span class="role-tag role-tag--<%= post.role %>"><%= roleLabel(post.role) %></span>
+      <% if (post.is_banned) { %><span class="role-tag role-tag--banned">已封禁</span><% } %>
+      <% if (post.user_id === topic.user_id) { %><span class="role-tag role-tag--op">楼主</span><% } %>
+    </div>
+    <div class="post-author-meta">
+      <span>加入于 <%= formatDateOnly(post.user_created_at) %></span>
+    </div>
+  </aside>
+
+  <div class="post-main">
+    <header class="post-head">
+      <span class="post-floor">#<%= floor %></span>
+      <time datetime="<%= new Date(Number(post.created_at)).toISOString() %>" title="<%= formatDate(post.created_at) %>"><%= timeAgo(post.created_at) %></time>
+      <% if (post.edited_count > 0) { %><span class="post-edited">已编辑</span><% } %>
+      <span class="post-head-spacer"></span>
+      <a class="post-permalink" href="/t/<%= topic.id %>?page=<%= pager.page %>#post-<%= post.id %>" aria-label="此回复的链接"><%- icon('link') %></a>
+    </header>
+
+    <% if (quotedPost) { %>
+      <a class="quoted-post" href="/p/<%= quotedPost.id %>">
+        <span class="quoted-author"><%- icon('quote') %> @<%= quotedPost.username %></span>
+        <span class="quoted-text"><%= excerpt(quotedPost.content, 160) %></span>
+      </a>
+    <% } %>
+
+    <div class="markdown-body post-content">
+      <%- markdown(post.content) %>
+    </div>
+
+    <% if (post.signature) { %>
+      <div class="post-signature markdown-body">
+        <%- markdown(post.signature) %>
+      </div>
+    <% } %>
+
+    <footer class="post-actions">
+      <form action="/posts/<%= post.id %>/like" method="post" class="inline-form" data-like-form>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="action-btn<%= liked && liked.has(post.id) ? ' is-active' : '' %>" data-like-button aria-label="点赞">
+          <%- icon('heart') %><span data-like-count><%= post.likes_count %></span>
+        </button>
+      </form>
+      <a class="action-btn" href="/t/<%= topic.id %>?quote=<%= post.id %>#reply"><%- icon('reply') %>回复</a>
+      <button type="button" class="action-btn" data-copy="<%= siteUrl %>/t/<%= topic.id %>#post-<%= post.id %>"><%- icon('link') %>复制链接</button>
+      <% if (canEditPost) { %>
+        <a class="action-btn" href="/posts/<%= post.id %>/edit"><%- icon('edit') %>编辑</a>
+        <form action="/posts/<%= post.id %>/delete" method="post" class="inline-form" data-confirm="确定要删除这条回复吗？此操作不可撤销。">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="action-btn action-btn--danger"><%- icon('trash') %>删除</button>
+        </form>
+      <% } %>
+    </footer>
+  </div>
+</article>

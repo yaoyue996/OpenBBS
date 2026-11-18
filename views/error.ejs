@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+
+<div class="error-page">
+  <div class="error-code"><%= status %></div>
+  <h1><%= status === 404 ? '页面走丢了' : status === 403 ? '没有访问权限' : '出了点问题' %></h1>
+  <p class="error-message"><%= message %></p>
+  <% if (status === 429) { %>
+    <p class="muted">稍等片刻再试，社区需要给每个人一点空间。</p>
+  <% } %>
+  <div class="error-actions">
+    <a class="btn btn-primary" href="/">返回首页</a>
+    <a class="btn btn-ghost" href="/topics">浏览话题</a>
+  </div>
+  <% if (stack) { %>
+    <details class="error-stack">
+      <summary>开发者详情</summary>
+      <pre><%= stack %></pre>
+    </details>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

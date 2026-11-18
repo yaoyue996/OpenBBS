@@ -1,0 +1,47 @@
+<%- include('partials/head') %>
+
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Notifications</span>
+    <h1>通知</h1>
+    <p class="page-sub"><% if (unreadNotifications) { %><%= unreadNotifications %> 条未读通知<% } else { %>所有通知都已读<% } %></p>
+  </div>
+  <form action="/notifications/read" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button type="submit" class="btn btn-ghost" <%= unreadNotifications ? '' : 'disabled' %>><%- icon('check') %>全部标为已读</button>
+  </form>
+</div>
+
+<% if (notifications.length === 0) { %>
+  <div class="empty-state card">
+    <span class="empty-icon">🔔</span>
+    <h3>还没有通知</h3>
+    <p>当有人回复你的主题、引用你的回复或提到你时，会在这里提醒你。</p>
+    <a class="btn btn-primary" href="/topics">浏览话题</a>
+  </div>
+<% } else { %>
+  <div class="notification-list card">
+    <% notifications.forEach((notification) => { %>
+      <a class="notification<%= notification.is_read ? '' : ' notification--unread' %>" href="/notifications/<%= notification.id %>">
+        <span class="notification-dot"></span>
+        <%- include('partials/avatar', { name: notification.actor_username, color: notification.actor_avatar_color, emoji: notification.actor_avatar_emoji, size: 'md' }) %>
+        <span class="notification-body">
+          <span class="notification-text">
+            <strong><%= notification.actor_username %></strong>
+            <%= notificationLabel(notification.type) %>
+            <% if (notification.topic_title) { %>
+              <strong class="notification-topic">「<%= truncate(notification.topic_title, 48) %>」</strong>
+            <% } %>
+          </span>
+          <% if (notification.post_content) { %>
+            <span class="notification-snippet"><%= excerpt(notification.post_content, 120) %></span>
+          <% } %>
+        </span>
+        <time class="notification-time" title="<%= formatDate(notification.created_at) %>"><%= timeAgo(notification.created_at) %></time>
+      </a>
+    <% }) %>
+  </div>
+  <%- include('partials/pagination', { pager }) %>
+<% } %>
+
+<%- include('partials/footer') %>

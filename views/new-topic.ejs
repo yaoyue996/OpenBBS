@@ -1,0 +1,78 @@
+<%- include('partials/head') %>
+
+<nav class="breadcrumb" aria-label="面包屑">
+  <a href="/">首页</a><span>/</span><a href="/topics">话题</a><span>/</span><span>发布新主题</span>
+</nav>
+
+<div class="compose-layout">
+  <div>
+    <div class="page-head page-head--compact">
+      <div>
+        <span class="eyebrow">New topic</span>
+        <h1>发布新主题</h1>
+        <p class="page-sub">清晰地描述你的问题或想法，更容易获得回应。</p>
+      </div>
+    </div>
+
+    <% if (error) { %>
+      <div class="flash flash--error" role="alert">
+        <span class="flash-icon"><%- icon('alert') %></span>
+        <span class="flash-text"><%= error %></span>
+      </div>
+    <% } %>
+
+    <form class="card form-card" action="/topics" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="category_id">选择分类</label>
+        <select id="category_id" name="category_id" required>
+          <option value="" disabled>请选择一个分类</option>
+          <% categories.forEach((category) => { %>
+            <option value="<%= category.id %>" <%= Number(selectedCategory) === category.id ? 'selected' : '' %>><%= category.icon %> <%= category.name %> — <%= category.description %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="title">标题</label>
+        <input id="title" type="text" name="title" value="<%= values.title || '' %>" minlength="4" maxlength="120" required placeholder="一句话说明你的主题（4–120 个字符）" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>内容</label>
+        <%- include('partials/editor', {
+          contentValue: values.content || '',
+          draftKey: 'new-topic',
+          placeholder: '展开说说你的想法、问题或分享… 支持 Markdown',
+          rows: 14
+        }) %>
+      </div>
+      <div class="form-actions">
+        <a class="btn btn-ghost" href="<%= selectedCategory ? `/c/${selectedCategory}` : '/topics' %>">取消</a>
+        <button type="submit" class="btn btn-primary btn-lg"><%- icon('send') %>发布主题</button>
+      </div>
+    </form>
+  </div>
+
+  <aside class="sidebar compose-sidebar">
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('sparkles') %>发布小贴士</h3>
+      <ul class="tips-list">
+        <li><strong>好标题</strong>：让人一眼看懂你想讨论什么。</li>
+        <li><strong>选对分类</strong>：技术问题发到「技术分享」或「问答求助」。</li>
+        <li><strong>补充上下文</strong>：环境、版本、已尝试的方法都很有帮助。</li>
+        <li><strong>保持友善</strong>：尊重不同观点，理性讨论。</li>
+      </ul>
+    </div>
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('code') %>Markdown 快捷键</h3>
+      <ul class="tips-list tips-list--mono">
+        <li><code>**粗体**</code> · <code>*斜体*</code></li>
+        <li><code>`行内代码`</code></li>
+        <li><code>[链接](https://…)</code></li>
+        <li><code>&gt; 引用</code></li>
+        <li><code>- 列表项</code></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

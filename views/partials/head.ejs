@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= pageTitle ? `${pageTitle} · ${settings.site_name}` : `${settings.site_name} · ${settings.site_description}` %></title>
+  <meta name="description" content="<%= metaDescription || settings.site_description %>">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="icon" href="<%= asset('favicon.svg') %>" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title="<%= settings.site_name %> RSS" href="/feed.xml">
+  <link rel="stylesheet" href="<%= asset('css/style.css') %>">
+  <script src="<%= asset('js/theme.js') %>"></script>
+</head>
+<body class="<%= bodyClass %>" data-page="<%= page %>">
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="<%= settings.site_name %> 首页">
+        <img class="brand-logo" src="<%= asset('logo.svg') %>" width="36" height="36" alt="">
+        <span class="brand-name"><%= settings.site_name %></span>
+      </a>
+
+      <nav class="site-nav" aria-label="主导航">
+        <a href="/" class="<%= page === 'home' ? 'is-active' : '' %>">首页</a>
+        <a href="/topics" class="<%= ['topics', 'category', 'topic'].includes(page) ? 'is-active' : '' %>">话题</a>
+        <a href="/about" class="<%= page === 'about' ? 'is-active' : '' %>">关于</a>
+      </nav>
+
+      <form class="header-search" action="/search" method="get" role="search">
+        <%- icon('search', 'header-search-icon') %>
+        <input type="search" name="q" value="<%= typeof query !== 'undefined' && query.q ? query.q : '' %>" placeholder="搜索话题和回复…" aria-label="搜索">
+      </form>
+
+      <div class="header-actions">
+        <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="切换深色/浅色模式" title="切换主题">
+          <span class="theme-icon theme-icon--light"><%- icon('sun') %></span>
+          <span class="theme-icon theme-icon--dark"><%- icon('moon') %></span>
+        </button>
+
+        <% if (user) { %>
+          <a href="/notifications" class="icon-btn notif-btn" aria-label="通知<%= unreadNotifications ? `，${unreadNotifications} 条未读` : '' %>">
+            <%- icon('bell') %>
+            <% if (unreadNotifications > 0) { %>
+              <span class="notif-badge"><%= unreadNotifications > 99 ? '99+' : unreadNotifications %></span>
+            <% } %>
+          </a>
+          <a href="/new" class="btn btn-sm btn-primary header-new"><%- icon('plus') %><span>发布</span></a>
+          <details class="user-menu">
+            <summary class="user-menu-trigger" aria-label="账户菜单">
+              <%- include('avatar', { name: user.username, color: user.avatar_color, emoji: user.avatar_emoji, size: 'sm' }) %>
+              <span class="user-menu-name"><%= user.username %></span>
+              <%- icon('chevron-down', 'chevron') %>
+            </summary>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <%- include('avatar', { name: user.username, color: user.avatar_color, emoji: user.avatar_emoji, size: 'md' }) %>
+                <div>
+                  <strong><%= user.username %></strong>
+                  <span class="role-tag role-tag--<%= user.role %>"><%= roleLabel(user.role) %></span>
+                </div>
+              </div>
+              <a href="/u/<%= user.id %>"><%- icon('user') %>个人主页</a>
+              <a href="/bookmarks"><%- icon('bookmark') %>我的收藏</a>
+              <a href="/notifications"><%- icon('bell') %>通知中心</a>
+              <a href="/settings"><%- icon('settings') %>个人设置</a>
+              <% if (isAdmin) { %>
+                <a href="/admin"><%- icon('shield') %>管理后台</a>
+              <% } %>
+              <div class="user-menu-sep"></div>
+              <form action="/logout" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="menu-button"><%- icon('logout') %>退出登录</button>
+              </form>
+            </div>
+          </details>
+        <% } else { %>
+          <a href="/login" class="btn btn-sm btn-ghost">登录</a>
+          <% if (registrationOpen) { %>
+            <a href="/register" class="btn btn-sm btn-primary">注册</a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container page">
+      <%- include('flash') %>

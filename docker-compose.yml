@@ -1,0 +1,39 @@
+services:
+  openbbs:
+    build:
+      context: .
+    image: openbbs:latest
+    container_name: openbbs
+    restart: unless-stopped
+    ports:
+      - "${OPENBBS_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
+      DATABASE_PATH: /app/data/openbbs.db
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+      SITE_NAME: ${SITE_NAME:-OpenBBS}
+      SITE_DESCRIPTION: ${SITE_DESCRIPTION:-一个属于你的开源社区}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+    volumes:
+      - openbbs-data:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/healthz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  openbbs-data:

@@ -1,0 +1,155 @@
+<%- include('partials/head') %>
+
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-kicker"><%- icon('sparkles') %>开源 · 自托管 · 无追踪</span>
+    <h1><%= settings.site_name %></h1>
+    <p class="hero-desc"><%= settings.site_description %></p>
+    <div class="hero-actions">
+      <% if (user) { %>
+        <a class="btn btn-primary btn-lg" href="/new"><%- icon('plus') %>发布主题</a>
+      <% } else if (registrationOpen) { %>
+        <a class="btn btn-primary btn-lg" href="/register"><%- icon('sparkles') %>加入社区</a>
+      <% } else { %>
+        <a class="btn btn-primary btn-lg" href="/login"><%- icon('user') %>登录社区</a>
+      <% } %>
+      <a class="btn btn-ghost btn-lg" href="/topics">浏览话题<%- icon('arrow-right') %></a>
+    </div>
+    <dl class="hero-stats">
+      <div><dt>成员</dt><dd><%= formatNumber(stats.users) %></dd></div>
+      <div><dt>主题</dt><dd><%= formatNumber(stats.topics) %></dd></div>
+      <div><dt>回复</dt><dd><%= formatNumber(stats.posts) %></dd></div>
+      <div><dt>在线</dt><dd><%= formatNumber(stats.online) %></dd></div>
+    </dl>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-bubble hero-bubble--1">
+      <span class="hero-bubble-avatar">💬</span>
+      <div><strong>欢迎来到社区</strong><span>发个帖，认识新朋友。</span></div>
+    </div>
+    <div class="hero-bubble hero-bubble--2">
+      <span class="hero-bubble-avatar">🚀</span>
+      <div><strong>分享你的想法</strong><span>技术、生活、灵感都可以。</span></div>
+    </div>
+    <div class="hero-bubble hero-bubble--3">
+      <span class="hero-bubble-avatar">✨</span>
+      <div><strong>保持友善</strong><span>理性讨论，认真交流。</span></div>
+    </div>
+    <div class="hero-glow"></div>
+  </div>
+</section>
+
+<div class="layout layout--sidebar">
+  <div class="layout-main">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Explore</span>
+          <h2>讨论分类</h2>
+        </div>
+        <a class="text-link" href="/topics">全部话题<%- icon('arrow-right') %></a>
+      </div>
+      <div class="category-grid">
+        <% categories.forEach((category) => { %>
+          <a class="category-card" href="/c/<%= category.id %>" style="--cat-color: <%= category.color %>">
+            <span class="category-icon"><%= category.icon %></span>
+            <span class="category-info">
+              <span class="category-name"><%= category.name %></span>
+              <span class="category-desc"><%= category.description %></span>
+              <% if (category.latest) { %>
+                <span class="category-latest">最新：<%= excerpt(category.latest.title, 34) %></span>
+              <% } else { %>
+                <span class="category-latest category-latest--empty">还没有主题，来发第一帖吧</span>
+              <% } %>
+              <span class="category-count"><%= formatNumber(category.topic_count) %> 主题 · <%= formatNumber(category.post_count) %> 回复</span>
+            </span>
+            <span class="category-arrow"><%- icon('chevron-right') %></span>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Community</span>
+          <h2>最新讨论</h2>
+        </div>
+        <div class="tabs tabs--inline">
+          <a href="<%= queryUrl({ tab: 'latest', page: null }) %>" class="<%= tab === 'latest' ? 'is-active' : '' %>">最新回复</a>
+          <a href="<%= queryUrl({ tab: 'new', page: null }) %>" class="<%= tab === 'new' ? 'is-active' : '' %>">最新发布</a>
+          <a href="<%= queryUrl({ tab: 'hot', page: null }) %>" class="<%= tab === 'hot' ? 'is-active' : '' %>">热门</a>
+        </div>
+      </div>
+
+      <% if (topics.length === 0) { %>
+        <div class="empty-state card">
+          <span class="empty-icon">🌱</span>
+          <h3>还没有讨论</h3>
+          <p>成为第一个开启话题的人吧。</p>
+          <a class="btn btn-primary" href="<%= user ? '/new' : '/register' %>">发布主题</a>
+        </div>
+      <% } else { %>
+        <div class="topic-list">
+          <% topics.forEach((topic) => { %>
+            <%- include('partials/topic-row', { topic }) %>
+          <% }) %>
+        </div>
+        <%- include('partials/pagination', { pager }) %>
+      <% } %>
+    </section>
+  </div>
+
+  <aside class="sidebar">
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('info') %>站点公告</h3>
+      <div class="markdown-body markdown-body--compact">
+        <%- announcementHtml %>
+      </div>
+    </div>
+
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('users') %>最近活跃</h3>
+      <ul class="active-users">
+        <% activeUsers.forEach((activeUser) => { %>
+          <li>
+            <a href="/u/<%= activeUser.id %>" class="active-user">
+              <span class="active-user-avatar">
+                <%- include('partials/avatar', { name: activeUser.username, color: activeUser.avatar_color, emoji: activeUser.avatar_emoji, size: 'sm' }) %>
+                <% if (isOnline(activeUser.last_seen_at)) { %><span class="online-dot" title="在线"></span><% } %>
+              </span>
+              <span class="active-user-info">
+                <span class="active-user-name"><%= activeUser.username %></span>
+                <span class="muted"><%= formatNumber(activeUser.post_count) %> 条回复</span>
+              </span>
+              <span class="role-tag role-tag--<%= activeUser.role %>"><%= roleLabel(activeUser.role) %></span>
+            </a>
+          </li>
+        <% }) %>
+        <% if (activeUsers.length === 0) { %><li class="muted">还没有成员。</li><% } %>
+      </ul>
+    </div>
+
+    <div class="card sidebar-card">
+      <h3 class="sidebar-title"><%- icon('sparkles') %>热门话题</h3>
+      <ol class="hot-topics">
+        <% hotTopics.forEach((hotTopic, index) => { %>
+          <li>
+            <span class="hot-index"><%= index + 1 %></span>
+            <a href="/t/<%= hotTopic.id %>"><%= truncate(hotTopic.title, 42) %></a>
+            <span class="hot-meta"><%= hotTopic.replies_count %> 回复</span>
+          </li>
+        <% }) %>
+        <% if (hotTopics.length === 0) { %><li class="muted">暂无数据。</li><% } %>
+      </ol>
+    </div>
+
+    <div class="card sidebar-card sidebar-card--accent">
+      <h3 class="sidebar-title"><%- icon('code') %>开源项目</h3>
+      <p class="muted">OpenBBS 是一个开源、可自托管的论坛系统，欢迎 Star、提交 Issue 或参与贡献。</p>
+      <a class="btn btn-subtle btn-block" href="https://github.com/yaoyue996/OpenBBS" target="_blank" rel="noopener"><%- icon('external') %>访问 GitHub</a>
+    </div>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

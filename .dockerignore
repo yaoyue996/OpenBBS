@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# runtime data and secrets
+data/*
+!data/.gitkeep
+.env
+.env.*
+!.env.example
+.runtime/
+*.log
+
+# development and tooling
+.git/
+.github/
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+test/
+coverage/
+.nyc_output/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# documentation is not needed at runtime
+docs/
+CONTRIBUTING.md
+SECURITY.md
+LICENSE

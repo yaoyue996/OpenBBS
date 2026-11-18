@@ -1,0 +1,63 @@
+<%- include('partials/head') %>
+
+<div class="auth-layout">
+  <section class="auth-aside">
+    <a class="brand brand--auth" href="/">
+      <img class="brand-logo" src="<%= asset('logo.svg') %>" width="44" height="44" alt="">
+      <span class="brand-name"><%= settings.site_name %></span>
+    </a>
+    <h2>欢迎回来</h2>
+    <p><%= settings.site_description %></p>
+    <ul class="auth-points">
+      <li><%- icon('message') %>参与话题讨论，分享你的见解</li>
+      <li><%- icon('bookmark') %>收藏感兴趣的内容</li>
+      <li><%- icon('bell') %>及时收到回复与提及通知</li>
+    </ul>
+    <div class="auth-quote">
+      <p>“好的社区，是认真交流的人一起建起来的。”</p>
+    </div>
+  </section>
+
+  <section class="auth-card card">
+    <div class="auth-head">
+      <span class="eyebrow">Sign in</span>
+      <h1>登录账户</h1>
+      <p class="muted">还没有账户？<%= registrationOpen ? '' : '本站当前关闭注册。' %></p>
+    </div>
+
+    <% if (error) { %>
+      <div class="flash flash--error" role="alert">
+        <span class="flash-icon"><%- icon('alert') %></span>
+        <span class="flash-text"><%= error %></span>
+      </div>
+    <% } %>
+
+    <form action="/login" method="post" class="auth-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="next" value="<%= next %>">
+      <div class="field">
+        <label for="username">用户名或邮箱</label>
+        <input id="username" type="text" name="username" value="<%= values.username || '' %>" required autocomplete="username" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">密码</label>
+        <input id="password" type="password" name="password" required autocomplete="current-password">
+      </div>
+      <label class="checkbox">
+        <input type="checkbox" name="remember" value="1" checked>
+        <span>保持登录状态</span>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">登录</button>
+    </form>
+
+    <div class="auth-foot">
+      <% if (registrationOpen) { %>
+        还没有账户？<a href="/register">立即注册</a>
+      <% } else { %>
+        <a href="/">返回首页</a>
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

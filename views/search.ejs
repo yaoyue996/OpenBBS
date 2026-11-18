@@ -1,0 +1,79 @@
+<%- include('partials/head') %>
+
+<div class="search-page">
+  <div class="page-head page-head--compact">
+    <div>
+      <span class="eyebrow">Search</span>
+      <h1>搜索社区</h1>
+      <p class="page-sub">查找主题、回复和感兴趣的内容。</p>
+    </div>
+  </div>
+
+  <form class="search-hero" action="/search" method="get" role="search">
+    <%- icon('search') %>
+    <input type="search" name="q" value="<%= q %>" placeholder="输入关键词…" aria-label="搜索关键词" autofocus>
+    <button type="submit" class="btn btn-primary">搜索</button>
+  </form>
+
+  <% if (q) { %>
+    <div class="tabs tabs--page">
+      <a href="<%= queryUrl({ type: 'topics', page: null }) %>" class="<%= type === 'topics' ? 'is-active' : '' %>"><%- icon('message') %>主题</a>
+      <a href="<%= queryUrl({ type: 'posts', page: null }) %>" class="<%= type === 'posts' ? 'is-active' : '' %>"><%- icon('reply') %>回复</a>
+    </div>
+
+    <% if (type === 'topics') { %>
+      <% if (topicResults.length === 0) { %>
+        <div class="empty-state card">
+          <span class="empty-icon">🔍</span>
+          <h3>没有找到相关主题</h3>
+          <p>试试更短的关键词，或者换一个说法。</p>
+        </div>
+      <% } else { %>
+        <p class="search-summary">找到 <%= topicResults.length %><%= topicResults.length >= 50 ? '+' : '' %> 个相关主题</p>
+        <div class="topic-list card topic-list--card">
+          <% topicResults.forEach((topic) => { %>
+            <%- include('partials/topic-row', { topic }) %>
+          <% }) %>
+        </div>
+      <% } %>
+    <% } else { %>
+      <% if (postResults.length === 0) { %>
+        <div class="empty-state card">
+          <span class="empty-icon">🔍</span>
+          <h3>没有找到相关回复</h3>
+          <p>试试搜索主题标题，或者使用不同的关键词。</p>
+        </div>
+      <% } else { %>
+        <p class="search-summary">找到 <%= postResults.length %><%= postResults.length >= 50 ? '+' : '' %> 条相关回复</p>
+        <div class="search-results">
+          <% postResults.forEach((post) => { %>
+            <article class="search-result card">
+              <div class="search-result-head">
+                <a class="search-result-topic" href="/t/<%= post.topic_id %>"><%= post.topic_title %></a>
+                <span class="category-chip" style="--cat-color: #6366f1"><%= post.category_name %></span>
+              </div>
+              <p class="search-snippet"><%= post.snippet %></p>
+              <div class="search-result-foot">
+                <span>由 <a href="/u/<%= post.user_id %>"><%= post.username %></a> 回复于 <%= timeAgo(post.created_at) %></span>
+                <a class="text-link" href="/p/<%= post.id %>">查看原帖<%- icon('arrow-right') %></a>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    <% } %>
+  <% } else { %>
+    <div class="search-suggestions">
+      <div class="card search-tip">
+        <h3><%- icon('sparkles') %>搜索小贴士</h3>
+        <ul>
+          <li>使用简短、具体的关键词，例如「部署」「SQLite」。</li>
+          <li>搜索会同时匹配主题标题和回复内容。</li>
+          <li>想找热门内容？去<a href="/topics?sort=hot">热门话题</a>看看。</li>
+        </ul>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

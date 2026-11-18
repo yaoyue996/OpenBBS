@@ -1,0 +1,122 @@
+<%- include('../partials/head') %>
+
+<div class="admin-shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>用户管理</h1>
+      <p class="page-sub">共 <%= formatNumber(total) %> 名用户。封禁、角色与密码重置。</p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-nav') %>
+
+  <form class="filter-bar card" action="/admin/users" method="get">
+    <input type="search" name="q" value="<%= q %>" placeholder="搜索用户名或邮箱…" aria-label="搜索用户">
+    <select name="role" aria-label="用户组">
+      <option value="">全部用户组</option>
+      <option value="admin" <%= role === 'admin' ? 'selected' : '' %>>管理员</option>
+      <option value="moderator" <%= role === 'moderator' ? 'selected' : '' %>>版主</option>
+      <option value="member" <%= role === 'member' ? 'selected' : '' %>>成员</option>
+    </select>
+    <select name="status" aria-label="状态">
+      <option value="">全部状态</option>
+      <option value="active" <%= status === 'active' ? 'selected' : '' %>>正常</option>
+      <option value="banned" <%= status === 'banned' ? 'selected' : '' %>>已封禁</option>
+    </select>
+    <button type="submit" class="btn btn-primary"><%- icon('search') %>筛选</button>
+    <a class="btn btn-ghost" href="/admin/users">重置</a>
+  </form>
+
+  <section class="card admin-panel">
+    <div class="table-wrap">
+      <table class="data-table data-table--users">
+        <thead>
+          <tr>
+            <th>用户</th>
+            <th>用户组</th>
+            <th>主题 / 回复</th>
+            <th>状态</th>
+            <th>注册时间</th>
+            <th class="col-actions">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach((item) => { %>
+            <tr>
+              <td>
+                <a href="/u/<%= item.id %>" class="table-user">
+                  <%- include('../partials/avatar', { name: item.username, color: item.avatar_color, emoji: item.avatar_emoji, size: 'sm' }) %>
+                  <span>
+                    <strong><%= item.username %><% if (item.id === user.id) { %> <span class="muted">(你)</span><% } %></strong>
+                    <span class="muted"><%= item.email %></span>
+                  </span>
+                </a>
+              </td>
+              <td>
+                <% if (item.id === user.id) { %>
+                  <span class="role-tag role-tag--<%= item.role %>"><%= roleLabel(item.role) %></span>
+                <% } else { %>
+                  <form action="/admin/users/<%= item.id %>/action" method="post" class="inline-form row-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="role">
+                    <select name="role" aria-label="<%= item.username %> 的用户组">
+                      <option value="member" <%= item.role === 'member' ? 'selected' : '' %>>成员</option>
+                      <option value="moderator" <%= item.role === 'moderator' ? 'selected' : '' %>>版主</option>
+                      <option value="admin" <%= item.role === 'admin' ? 'selected' : '' %>>管理员</option>
+                    </select>
+                    <button type="submit" class="btn btn-ghost btn-xs">保存</button>
+                  </form>
+                <% } %>
+              </td>
+              <td><%= item.topic_count %> / <%= item.post_count %></td>
+              <td>
+                <% if (item.is_banned) { %>
+                  <span class="badge badge--danger">已封禁</span>
+                  <% if (item.ban_reason) { %><span class="muted small" title="<%= item.ban_reason %>">原因</span><% } %>
+                <% } else { %>
+                  <span class="badge badge--success">正常</span>
+                <% } %>
+                <span class="muted small"><%= timeAgo(item.last_seen_at) %>活跃</span>
+              </td>
+              <td class="muted"><%= formatDateOnly(item.created_at) %></td>
+              <td class="col-actions">
+                <div class="row-actions">
+                  <% if (item.is_banned) { %>
+                    <form action="/admin/users/<%= item.id %>/action" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="action" value="unban">
+                      <button type="submit" class="btn btn-ghost btn-xs"><%- icon('check') %>解封</button>
+                    </form>
+                  <% } else if (item.id !== user.id) { %>
+                    <details class="inline-details">
+                      <summary class="btn btn-ghost btn-xs btn-ghost--danger"><%- icon('lock') %>封禁</summary>
+                      <form action="/admin/users/<%= item.id %>/action" method="post" class="details-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="action" value="ban">
+                        <input type="text" name="reason" maxlength="200" placeholder="封禁原因（可选）">
+                        <button type="submit" class="btn btn-danger btn-sm">确认封禁</button>
+                      </form>
+                    </details>
+                  <% } %>
+                  <% if (item.role !== 'admin' || item.id === user.id) { %>
+                    <form action="/admin/users/<%= item.id %>/action" method="post" data-confirm="确定重置「<%= item.username %>」的密码吗？对方所有登录将失效。">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="action" value="reset-password">
+                      <button type="submit" class="btn btn-ghost btn-xs"><%- icon('refresh') %>重置密码</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% if (users.length === 0) { %><p class="empty-inline">没有找到符合条件的用户。</p><% } %>
+  </section>
+
+  <%- include('../partials/pagination', { pager }) %>
+</div>
+
+<%- include('../partials/footer') %>

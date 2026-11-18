@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# runtime data
+data/*
+!data/.gitkeep
+*.db
+*.db-wal
+*.db-shm
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# runtime binaries installed by the deploy scripts
+.runtime/
+
+# logs
+*.log
+logs/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# test output
+coverage/
+.nyc_output/

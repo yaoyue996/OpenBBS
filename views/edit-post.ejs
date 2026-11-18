@@ -1,0 +1,47 @@
+<%- include('partials/head') %>
+
+<nav class="breadcrumb" aria-label="面包屑">
+  <a href="/">首页</a><span>/</span>
+  <a href="/t/<%= topic.id %>"><%= truncate(topic.title, 40) %></a><span>/</span>
+  <span>编辑</span>
+</nav>
+
+<div class="page-head page-head--compact">
+  <div>
+    <span class="eyebrow">Edit</span>
+    <h1>编辑<%= isFirst ? '主题' : '回复' %></h1>
+    <p class="page-sub">修改后的内容会显示「已编辑」标记。</p>
+  </div>
+</div>
+
+<% if (error) { %>
+  <div class="flash flash--error" role="alert">
+    <span class="flash-icon"><%- icon('alert') %></span>
+    <span class="flash-text"><%= error %></span>
+  </div>
+<% } %>
+
+<form class="card form-card" action="/posts/<%= post.id %>/edit" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <% if (isFirst) { %>
+    <div class="field">
+      <label for="title">标题</label>
+      <input id="title" type="text" name="title" value="<%= topic.title %>" minlength="4" maxlength="120" required autocomplete="off">
+    </div>
+  <% } %>
+  <div class="field">
+    <label>内容</label>
+    <%- include('partials/editor', {
+      contentValue: post.content,
+      draftKey: `edit-post-${post.id}`,
+      placeholder: '修改你的内容…',
+      rows: 14
+    }) %>
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-ghost" href="/p/<%= post.id %>">取消</a>
+    <button type="submit" class="btn btn-primary"><%- icon('check') %>保存修改</button>
+  </div>
+</form>
+
+<%- include('partials/footer') %>

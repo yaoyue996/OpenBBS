@@ -1,0 +1,9 @@
+<nav class="admin-nav" aria-label="管理后台导航">
+  <a href="/admin" class="<%= currentPath === '/admin' ? 'is-active' : '' %>"><%- icon('chart') %>概览</a>
+  <a href="/admin/categories" class="<%= currentPath.startsWith('/admin/categories') ? 'is-active' : '' %>"><%- icon('folder') %>分类</a>
+  <a href="/admin/users" class="<%= currentPath.startsWith('/admin/users') ? 'is-active' : '' %>"><%- icon('users') %>用户</a>
+  <a href="/admin/topics" class="<%= currentPath.startsWith('/admin/topics') ? 'is-active' : '' %>"><%- icon('message') %>内容</a>
+  <a href="/admin/settings" class="<%= currentPath.startsWith('/admin/settings') ? 'is-active' : '' %>"><%- icon('settings') %>设置</a>
+  <span class="admin-nav-spacer"></span>
+  <a href="/" class="admin-nav-back"><%- icon('arrow-left') %>返回站点</a>
+</nav>

@@ -1,0 +1,108 @@
+<%- include('../partials/head') %>
+
+<div class="admin-shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>内容管理</h1>
+      <p class="page-sub">共 <%= formatNumber(total) %> 个主题。管理置顶、锁定与回收站。</p>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-nav') %>
+
+  <form class="filter-bar card" action="/admin/topics" method="get">
+    <input type="search" name="q" value="<%= q %>" placeholder="搜索主题标题…" aria-label="搜索主题">
+    <select name="category" aria-label="分类">
+      <option value="">全部分类</option>
+      <% categories.forEach((category) => { %>
+        <option value="<%= category.id %>" <%= categoryId === category.id ? 'selected' : '' %>><%= category.icon %> <%= category.name %></option>
+      <% }) %>
+    </select>
+    <select name="status" aria-label="状态">
+      <option value="">全部状态</option>
+      <option value="visible" <%= status === 'visible' ? 'selected' : '' %>>正常</option>
+      <option value="deleted" <%= status === 'deleted' ? 'selected' : '' %>>回收站</option>
+      <option value="pinned" <%= status === 'pinned' ? 'selected' : '' %>>已置顶</option>
+      <option value="locked" <%= status === 'locked' ? 'selected' : '' %>>已锁定</option>
+    </select>
+    <button type="submit" class="btn btn-primary"><%- icon('search') %>筛选</button>
+    <a class="btn btn-ghost" href="/admin/topics">重置</a>
+  </form>
+
+  <section class="card admin-panel">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>主题</th>
+            <th>作者</th>
+            <th>回复 / 浏览</th>
+            <th>状态</th>
+            <th>最后回复</th>
+            <th class="col-actions">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% topics.forEach((topic) => { %>
+            <tr class="<%= topic.is_deleted ? 'row-deleted' : '' %>">
+              <td>
+                <div class="table-topic">
+                  <% if (topic.is_deleted) { %>
+                    <span class="mini-badge mini-badge--danger">已删除</span>
+                    <span><%= truncate(topic.title, 52) %></span>
+                  <% } else { %>
+                    <a href="/t/<%= topic.id %>"><%= truncate(topic.title, 52) %></a>
+                  <% } %>
+                  <span class="muted"><%= topic.category_name %></span>
+                </div>
+              </td>
+              <td><a href="/u/<%= topic.user_id %>"><%= topic.username %></a></td>
+              <td><%= topic.post_count %> / <%= formatNumber(topic.views) %></td>
+              <td>
+                <div class="status-flags">
+                  <% if (topic.is_pinned) { %><span class="mini-badge"><%- icon('pin') %>置顶</span><% } %>
+                  <% if (topic.is_locked) { %><span class="mini-badge"><%- icon('lock') %>锁定</span><% } %>
+                  <% if (!topic.is_pinned && !topic.is_locked && !topic.is_deleted) { %><span class="badge badge--success">正常</span><% } %>
+                </div>
+              </td>
+              <td class="muted"><%= timeAgo(topic.last_reply_at) %><br><span class="small"><%= topic.replies_count %> 条回复</span></td>
+              <td class="col-actions">
+                <div class="row-actions">
+                  <form action="/admin/topics/<%= topic.id %>/action" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="<%= topic.is_pinned ? 'unpin' : 'pin' %>">
+                    <button type="submit" class="btn btn-ghost btn-xs"><%- icon('pin') %><%= topic.is_pinned ? '取消置顶' : '置顶' %></button>
+                  </form>
+                  <form action="/admin/topics/<%= topic.id %>/action" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="<%= topic.is_locked ? 'unlock' : 'lock' %>">
+                    <button type="submit" class="btn btn-ghost btn-xs"><%- icon('lock') %><%= topic.is_locked ? '解锁' : '锁定' %></button>
+                  </form>
+                  <% if (topic.is_deleted) { %>
+                    <form action="/admin/topics/<%= topic.id %>/action" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="action" value="restore">
+                      <button type="submit" class="btn btn-ghost btn-xs"><%- icon('refresh') %>恢复</button>
+                    </form>
+                  <% } else { %>
+                    <form action="/admin/topics/<%= topic.id %>/action" method="post" data-confirm="确定删除主题「<%= topic.title %>」吗？删除后可在回收站恢复。">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="action" value="delete">
+                      <button type="submit" class="btn btn-ghost btn-xs btn-ghost--danger"><%- icon('trash') %>删除</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% if (topics.length === 0) { %><p class="empty-inline">没有找到符合条件的主题。</p><% } %>
+  </section>
+
+  <%- include('../partials/pagination', { pager }) %>
+</div>
+
+<%- include('../partials/footer') %>

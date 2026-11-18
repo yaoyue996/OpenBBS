@@ -1,0 +1,72 @@
+<%- include('partials/head') %>
+
+<div class="auth-layout">
+  <section class="auth-aside auth-aside--register">
+    <a class="brand brand--auth" href="/">
+      <img class="brand-logo" src="<%= asset('logo.svg') %>" width="44" height="44" alt="">
+      <span class="brand-name"><%= settings.site_name %></span>
+    </a>
+    <h2>加入我们的社区</h2>
+    <p>注册一个账户，开始参与讨论、分享经验、结识同好。</p>
+    <ul class="auth-points">
+      <li><%- icon('sparkles') %>发布主题与回复</li>
+      <li><%- icon('heart') %>为喜欢的回复点赞</li>
+      <li><%- icon('users') %>拥有自己的社区名片</li>
+    </ul>
+  </section>
+
+  <section class="auth-card card">
+    <div class="auth-head">
+      <span class="eyebrow">Create account</span>
+      <h1>创建账户</h1>
+    </div>
+
+    <% if (!open) { %>
+      <div class="notice notice--inline">
+        <%- icon('lock') %>
+        <div><strong>注册已关闭</strong><p>本站当前只允许现有成员登录。</p></div>
+      </div>
+      <a class="btn btn-primary btn-block" href="/login">前往登录</a>
+    <% } else { %>
+      <% if (error) { %>
+        <div class="flash flash--error" role="alert">
+          <span class="flash-icon"><%- icon('alert') %></span>
+          <span class="flash-text"><%= error %></span>
+        </div>
+      <% } %>
+
+      <form action="/register" method="post" class="auth-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="honeypot" aria-hidden="true">
+          <label>网站<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <div class="field">
+          <label for="username">用户名</label>
+          <input id="username" type="text" name="username" value="<%= values.username || '' %>" minlength="2" maxlength="24" required autocomplete="username" autofocus placeholder="2–24 个字符">
+          <span class="field-hint">支持中文、字母、数字、下划线和连字符。</span>
+        </div>
+        <div class="field">
+          <label for="email">邮箱</label>
+          <input id="email" type="email" name="email" value="<%= values.email || '' %>" required autocomplete="email" placeholder="you@example.com">
+          <span class="field-hint">仅用于账户安全，不会公开展示。</span>
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" type="password" name="password" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="至少 8 个字符">
+        </div>
+        <div class="field">
+          <label for="confirm_password">确认密码</label>
+          <input id="confirm_password" type="password" name="confirm_password" minlength="8" maxlength="128" required autocomplete="new-password">
+        </div>
+        <p class="auth-terms">注册即表示你同意遵守社区规则，保持友善与理性。</p>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">创建账户</button>
+      </form>
+
+      <div class="auth-foot">
+        已有账户？<a href="/login">直接登录</a>
+      </div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

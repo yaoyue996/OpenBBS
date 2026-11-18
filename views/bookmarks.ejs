@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Bookmarks</span>
+    <h1>我的收藏</h1>
+    <p class="page-sub">共收藏了 <%= formatNumber(total) %> 个主题。</p>
+  </div>
+  <a class="btn btn-ghost" href="/topics">继续浏览<%- icon('arrow-right') %></a>
+</div>
+
+<% if (topics.length === 0) { %>
+  <div class="empty-state card">
+    <span class="empty-icon">🔖</span>
+    <h3>收藏夹是空的</h3>
+    <p>在主题页面点击「收藏」，以后可以随时回来查看。</p>
+    <a class="btn btn-primary" href="/topics">去逛逛</a>
+  </div>
+<% } else { %>
+  <div class="bookmark-list">
+    <% topics.forEach((topic) => { %>
+      <div class="bookmark-item card">
+        <div class="bookmark-main">
+          <a href="/t/<%= topic.id %>" class="bookmark-title"><%= topic.title %></a>
+          <div class="bookmark-meta">
+            <a class="category-chip" href="/c/<%= topic.category_id %>" style="--cat-color: <%= topic.category_color %>"><%= topic.category_icon %> <%= topic.category_name %></a>
+            <span>由 <a href="/u/<%= topic.user_id %>"><%= topic.author_username %></a></span>
+            <span class="dot">·</span>
+            <span><%= topic.replies_count %> 回复</span>
+            <span class="dot">·</span>
+            <span>收藏于 <%= timeAgo(topic.bookmarked_at) %></span>
+          </div>
+        </div>
+        <form action="/t/<%= topic.id %>/bookmark" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-ghost btn-sm"><%- icon('bookmark') %>取消收藏</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+  <%- include('partials/pagination', { pager }) %>
+<% } %>
+
+<%- include('partials/footer') %>

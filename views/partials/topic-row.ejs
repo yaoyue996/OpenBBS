@@ -1,0 +1,46 @@
+<% const lastUser = topic.last_username || topic.author_username; %>
+<article class="topic-row<%= topic.is_pinned ? ' topic-row--pinned' : '' %>">
+  <div class="topic-row-avatar">
+    <%- include('avatar', {
+      name: topic.author_username,
+      color: topic.author_avatar_color,
+      emoji: topic.author_avatar_emoji,
+      size: 'md'
+    }) %>
+  </div>
+  <div class="topic-row-body">
+    <div class="topic-row-title">
+      <% if (topic.is_pinned) { %><span class="mini-badge mini-badge--pin"><%- icon('pin') %>置顶</span><% } %>
+      <% if (topic.is_locked) { %><span class="mini-badge"><%- icon('lock') %>已锁定</span><% } %>
+      <% if (topic.is_deleted) { %><span class="mini-badge mini-badge--danger">已删除</span><% } %>
+      <a href="/t/<%= topic.id %>" class="topic-title"><%= topic.title %></a>
+    </div>
+    <div class="topic-row-meta">
+      <% if (typeof showCategory === 'undefined' || showCategory) { %>
+        <% if (topic.category_id) { %>
+          <a class="category-chip" href="/c/<%= topic.category_id %>" style="--cat-color: <%= topic.category_color || '#6366f1' %>"><%= topic.category_icon || '💬' %> <%= topic.category_name %></a>
+        <% } else { %>
+          <span class="category-chip" style="--cat-color: <%= topic.category_color || '#6366f1' %>"><%= topic.category_icon || '💬' %> <%= topic.category_name %></span>
+        <% } %>
+      <% } %>
+      <span>由 <a href="/u/<%= topic.user_id %>"><%= topic.author_username %></a> 发布于 <%= timeAgo(topic.created_at) %></span>
+    </div>
+  </div>
+  <div class="topic-row-stats" aria-label="统计数据">
+    <span title="回复"><%- icon('message') %><%= formatNumber(topic.replies_count) %></span>
+    <span title="浏览"><%- icon('eye') %><%= formatNumber(topic.views) %></span>
+  </div>
+  <div class="topic-row-last">
+    <span class="last-label">最后回复</span>
+    <span class="last-user">
+      <%- include('avatar', {
+        name: lastUser,
+        color: topic.last_avatar_color || topic.author_avatar_color,
+        emoji: topic.last_avatar_emoji || topic.author_avatar_emoji,
+        size: 'xs'
+      }) %>
+      <a href="/u/<%= topic.last_reply_user_id || topic.user_id %>"><%= lastUser %></a>
+    </span>
+    <span class="last-time"><%= timeAgo(topic.last_reply_at || topic.created_at) %></span>
+  </div>
+</article>

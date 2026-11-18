@@ -1,0 +1,9 @@
+<% if (flash) { %>
+  <div class="flash flash--<%= flash.type %>" role="status" data-flash>
+    <span class="flash-icon">
+      <%- icon(flash.type === 'success' ? 'check' : flash.type === 'info' ? 'info' : 'alert') %>
+    </span>
+    <span class="flash-text"><%= flash.message %></span>
+    <button type="button" class="flash-close" data-flash-close aria-label="关闭提示"><%- icon('x') %></button>
+  </div>
+<% } %>
